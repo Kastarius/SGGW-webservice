@@ -1,0 +1,5 @@
+/.idea/
+/SGGWSupportWS.iml
+/target/
+src/main/resources/local.properties
+src/test/

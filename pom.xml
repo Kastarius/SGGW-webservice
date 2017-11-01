@@ -36,11 +36,11 @@
             <version>5.1.41</version>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>com.microsoft.sqlserver</groupId>-->
-            <!--<artifactId>mssql-jdbc</artifactId>-->
-            <!--<version>6.1.0.jre8</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>6.1.0.jre8</version>
+        </dependency>
 
         <dependency>
             <groupId>commons-lang</groupId>
@@ -84,6 +84,7 @@
 
 
     <build>
+        <finalName>SGGWSupportWS</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
