@@ -1,0 +1,3 @@
+id,login,password,firstName,lastName,email,phone
+1,admin,admin,Admin,Admin,admin@gmail.com,123456789
+2,user,user,User,User,user@gmail.com,987654321

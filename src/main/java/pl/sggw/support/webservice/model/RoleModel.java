@@ -17,7 +17,7 @@ public class RoleModel extends ItemModel implements GrantedAuthority {
     private long id;
     @Column(name = "Nazwa")
     private String name;
-    @Column(name = "Kod")
+    @Column(name = "Kod", unique = true, nullable = false)
     private String code;
 
     @Override
