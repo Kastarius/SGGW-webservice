@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.transaction.Transactional;
+import java.util.Objects;
 
 /**
  * Created by Kamil on 2017-10-24.
@@ -30,4 +31,15 @@ public class RoleDAO extends GenericDAO<RoleModel>{
         return qb.where(builder.equal(qb.getColumn("id"),roleId)).executeWithSingleResult();
     }
 
+    public RoleModel getRoleByCode(String code){
+        QueryBuilder qb = createQuery();
+        CriteriaBuilder builder = qb.getBuilder();
+        return qb.where(builder.equal(qb.getColumn("code"),code)).executeWithSingleResult();
+    }
+
+    @Override
+    public void save(RoleModel entity) {
+        if(Objects.isNull(getRoleById(entity.getId())))entity.setId(0);
+        super.save(entity);
+    }
 }

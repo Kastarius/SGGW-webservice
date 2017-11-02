@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -18,9 +19,9 @@ public class UserModel extends ItemModel implements UserDetails {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "UzytkownikID")
     private long id;
-    @Column(name = "Login")
+    @Column(name = "Login", unique = true, nullable = false)
     private String login;
-    @Column(name = "Haslo")
+    @Column(name = "Haslo", nullable = false)
     private String password;
     @Column(name = "Imie")
     private String firstName;
@@ -125,6 +126,9 @@ public class UserModel extends ItemModel implements UserDetails {
     }
 
     public Set<RoleModel> getPermissions() {
+        if(this.permissions == null){
+            this.permissions = new HashSet<>();
+        }
         return permissions;
     }
 

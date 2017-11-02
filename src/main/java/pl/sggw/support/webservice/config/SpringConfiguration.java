@@ -17,7 +17,8 @@ import org.springframework.core.io.Resource;
                 "pl.sggw.support.webservice.dao",
                 "pl.sggw.support.webservice.controller",
                 "pl.sggw.support.webservice.populator",
-                "pl.sggw.support.webservice.security"
+                "pl.sggw.support.webservice.security",
+                "pl.sggw.support.webservice.setup"
         })
 public class SpringConfiguration {
 
