@@ -1,6 +1,7 @@
 package pl.sggw.support.webservice.dao;
 
 import org.springframework.stereotype.Repository;
+import pl.sggw.support.webservice.dao.query.QueryBuilder;
 import pl.sggw.support.webservice.model.RoleModel;
 
 import javax.persistence.EntityManager;
@@ -26,14 +27,14 @@ public class RoleDAO extends GenericDAO<RoleModel>{
 
 
     public RoleModel getRoleById(long roleId){
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
+        QueryBuilder<RoleModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
         return qb.where(builder.equal(qb.getColumn("id"),roleId)).executeWithSingleResult();
     }
 
     public RoleModel getRoleByCode(String code){
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
+        QueryBuilder<RoleModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
         return qb.where(builder.equal(qb.getColumn("code"),code)).executeWithSingleResult();
     }
 

@@ -1,5 +1,10 @@
 package pl.sggw.support.webservice.dto;
 
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -8,11 +13,21 @@ import java.util.List;
 public class User {
 
     private long id;
+    @Size(max = 255,message = "Login can be up to 255 characters")
+    @NotEmpty(message = "Login cannot be empty")
     private String login;
+    @Size(max = 255,message = "Password can be up to 255 characters")
+    @NotEmpty(message = "Password cannot be empty")
     private String password;
+    @Size(max = 255,message = "First name can be up to 255 characters")
     private String firstName;
+    @Size(max = 255,message = "Last name can be up to 255 characters")
     private String lastName;
+    @Size(max = 255,message = "Email address can be up to 255 characters")
+    @Email(message = "Please provide a valid e-mail")
     private String email;
+    @Size(max = 9,message = "Phone number can be up to 9 characters")
+    @Digits(integer = 9,fraction = 0,message = "Phone number can contains only numbers")
     private String phone;
     private List<Role> permissions;
 
