@@ -1,20 +1,19 @@
 package pl.sggw.support.webservice.dao;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.sggw.support.webservice.dao.exception.ConstraintViolationException;
+import pl.sggw.support.webservice.dao.exception.DatabaseOperationException;
+import pl.sggw.support.webservice.dao.query.QueryBuilder;
+import pl.sggw.support.webservice.dao.validator.ConstraintValidator;
+import pl.sggw.support.webservice.dao.validator.Validator;
+import pl.sggw.support.webservice.dao.validator.violation.Violation;
 import pl.sggw.support.webservice.model.ItemModel;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import javax.transaction.Transactional;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by Kamil on 2017-06-15.
@@ -23,14 +22,18 @@ public abstract class GenericDAO<T extends ItemModel> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GenericDAO.class);
     private final Class<T> modelClass;
+    private List<Validator<T>> validators = new ArrayList<>();
 
 
     public GenericDAO() {
         this.modelClass = resolveModelClass();
+        this.validators.add(new ConstraintValidator<>(this));
         info("Initialization DAO for "+ modelClass.getSimpleName());
     }
 
     protected abstract EntityManager getEntityManager();
+
+    public List<Validator<T>> getValidators() {return this.validators;}
 
     @SuppressWarnings("unchecked")
     private Class<T> resolveModelClass() {
@@ -39,30 +42,33 @@ public abstract class GenericDAO<T extends ItemModel> {
         return (Class<T>) pt.getActualTypeArguments()[0];
     }
 
+    public Class<T> getModelClass(){
+        return this.modelClass;
+    }
+
     public void save(T entity){
-        T tempobject;
-        try{
-            if(entity.getId() == 0) {
+        try {
+            validate(entity);
+            if(Objects.isNull(getEntityManager().find(modelClass, entity.getId()))) {
                 info("Saving entity : " + entity);
                 getEntityManager().persist(entity);
             } else {
-                //TODO
                 info("Updating entity : " + entity);
                 getEntityManager().merge(entity);
-                getEntityManager().flush();
             }
-        }catch(Exception e){
-            error(e.getMessage());
+            getEntityManager().flush();
+        } catch(ConstraintViolationException cve) {
+            error(cve.getMessage(),cve);
+            throw cve;
+        } catch(Exception e){
+            error(e.getMessage(),e);
+            throw new DatabaseOperationException(e);
         }
     }
 
     public void saveAll(List<T> entities){
-        try{
-            for(T entity : entities){
-                this.save(entity);
-            }
-        }catch(Exception e){
-            error(e.getMessage());
+        for(T entity : entities){
+            this.save(entity);
         }
     }
 
@@ -74,7 +80,8 @@ public abstract class GenericDAO<T extends ItemModel> {
             tempobject = getEntityManager().find(modelClass, entity.getId());
             getEntityManager().remove(tempobject);
         }catch(Exception e){
-            error(e.getMessage());
+            error(e.getMessage(),e);
+            throw new DatabaseOperationException(e);
         }
     }
 
@@ -87,98 +94,30 @@ public abstract class GenericDAO<T extends ItemModel> {
                 getEntityManager().remove(tempobject);
             }
         }catch(Exception e){
-            error(e.getMessage());
+            error(e.getMessage(),e);
+            throw new DatabaseOperationException(e);
         }
     }
 
-    public QueryBuilder createQuery(){
-        return new QueryBuilder(getEntityManager());
+
+    public QueryBuilder<T> createQuery(){
+        return QueryBuilder.createQuery(getEntityManager(),this.modelClass);
     }
 
-    public List<T> findList(TypedQuery<T> query){
-        try{
-            return query.getResultList();
-        }catch(Exception e){
-            error(e.getMessage());
-            return null;
-        }
-    }
-
-    public T findSingle(TypedQuery<T> query){
-        try{
-            return query.getSingleResult();
-        }catch(Exception e){
-            error(e.getMessage());
-            return null;
-        }
-    }
-
-    void info(String message){
+    protected void info(String message){
         LOG.info(message);
     }
 
-    void error(String message){
-        LOG.error(message);
+    protected void error(String message, Exception ex){
+        LOG.error(message,ex);
     }
 
-
-
-    class QueryBuilder {
-        private EntityManager entityManager;
-        private CriteriaBuilder builder;
-        private CriteriaQuery<T> criteriaQuery;
-        private Root<T> tableObject;
-        private Path<String> column;
-        private Predicate[] predicates;
-
-        QueryBuilder(EntityManager entityManager) {
-            this.entityManager = entityManager;
-            this.builder = this.entityManager.getCriteriaBuilder();
-            this.criteriaQuery = this.builder.createQuery(modelClass);
-            this.tableObject = criteriaQuery.from(modelClass);
+    private void validate(T entity) {
+        Set<Violation<T>> validationResult = new HashSet<>();
+        for (Validator<T> validator: validators) {
+            validationResult.addAll(validator.validate(entity));
         }
-
-        QueryBuilder where(Predicate... predicates){
-            if(Objects.isNull(this.predicates)) {
-                this.predicates = predicates;
-            } else {
-                this.predicates = (Predicate[]) ArrayUtils.addAll(this.predicates, predicates);
-            }
-            return this;
-        }
-
-        CriteriaBuilder getBuilder() {
-            return this.builder;
-        }
-
-        Path<String> getColumn(String columnName) {
-            this.column = tableObject.get(columnName);
-            return this.column;
-        }
-
-        private TypedQuery<T> execute() {
-            CriteriaQuery<T> select = this.criteriaQuery.select(this.tableObject);
-            CriteriaQuery<T> query = Objects.nonNull(this.predicates)?select.where(this.predicates):select;
-            return getEntityManager().createQuery(query);
-        }
-        List<T> executeWithResultList(){
-            try {
-                return execute().getResultList();
-            } catch (NoResultException e){
-                return new ArrayList<>();
-            }
-        }
-
-
-        T executeWithSingleResult() {
-            try {
-            return execute().getSingleResult();
-            } catch (NoResultException e){
-                return null;
-            }
-        }
-
-
+        if(!validationResult.isEmpty())
+            throw new ConstraintViolationException(String.format("Entity [%s] violates constraint",entity.toString()),validationResult);
     }
-
 }

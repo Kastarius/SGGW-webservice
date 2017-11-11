@@ -23,7 +23,7 @@ public class AuthenticationService {
     private UserService userService;
 
     public void tryAuthenticateUser(String login, String password, HttpServletResponse response) throws LoginFailureException{
-        Optional<UserModel> userModel = Optional.ofNullable(userService.loadUserByCredentials(login, password));
+        Optional<UserModel> userModel = Optional.ofNullable(userService.getUserByCredentials(login, password));
         if(userModel.isPresent()){
             tokenAuthenticationService.addAuthentication(response,new UserAuthentication(userModel.get()));
         } else {

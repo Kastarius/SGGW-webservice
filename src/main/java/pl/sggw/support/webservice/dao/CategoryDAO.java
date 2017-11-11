@@ -1,9 +1,8 @@
 package pl.sggw.support.webservice.dao;
 
 import org.springframework.stereotype.Repository;
-import pl.sggw.support.webservice.dto.Category;
+import pl.sggw.support.webservice.dao.query.QueryBuilder;
 import pl.sggw.support.webservice.model.CategoryModel;
-import pl.sggw.support.webservice.model.PriorityModel;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -36,8 +35,8 @@ public class CategoryDAO extends GenericDAO<CategoryModel> {
     }
 
     public CategoryModel getCategoryByID(long id) {
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
+        QueryBuilder<CategoryModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
         return qb.where(builder.equal(qb.getColumn("id"),id)).executeWithSingleResult();
     }
 

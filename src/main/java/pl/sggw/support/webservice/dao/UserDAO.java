@@ -2,17 +2,23 @@ package pl.sggw.support.webservice.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import pl.sggw.support.webservice.model.RoleModel;
-import pl.sggw.support.webservice.model.UserModel;
+import pl.sggw.support.webservice.dao.exception.DatabaseOperationException;
+import pl.sggw.support.webservice.dao.query.QueryBuilder;
+import pl.sggw.support.webservice.dao.query.TypeLessQueryBuilder;
+import pl.sggw.support.webservice.model.*;
+import pl.sggw.support.webservice.model.RoleModel_;
+import pl.sggw.support.webservice.model.UserModel_;
 import pl.sggw.support.webservice.security.SecurityHelper;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.metamodel.CollectionAttribute;
+import javax.persistence.metamodel.SetAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,23 +47,23 @@ public class UserDAO extends GenericDAO<UserModel> {
     }
 
     public UserModel getUserByCredentials(String login, String password){
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
-        return qb.where(builder.equal(qb.getColumn("login"),login),
-                builder.and(builder.equal(qb.getColumn("password"),securityHelper.encodePassword(password))))
+        QueryBuilder<UserModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
+        return qb.where(builder.and(builder.equal(qb.getColumn(UserModel_.login),login),
+                builder.equal(qb.getColumn(UserModel_.password),securityHelper.encodePassword(password))))
                 .executeWithSingleResult();
     }
 
     public UserModel getUserByLogin(String login){
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
-        return qb.where(builder.equal(qb.getColumn("login"),login)).executeWithSingleResult();
+        QueryBuilder<UserModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
+        return qb.where(builder.equal(qb.getColumn(UserModel_.login),login)).executeWithSingleResult();
     }
 
     public UserModel getUserByID(long userId){
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
-        return qb.where(builder.equal(qb.getColumn("id"),userId)).executeWithSingleResult();
+        QueryBuilder<UserModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
+        return qb.where(builder.equal(qb.getColumn(UserModel_.id),userId)).executeWithSingleResult();
     }
 
     @Override
@@ -68,19 +74,29 @@ public class UserDAO extends GenericDAO<UserModel> {
             if(Objects.nonNull(roleModel)){
                 role = roleModel;
             } else {
-                roleDAO.save(role);
+                throw new DatabaseOperationException(String.format("Cannot find role with id %s",role.getId()));
             }
             return role;
-        }).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
         entity.setPermissions(models);
-        if(Objects.isNull(getUserByID(entity.getId()))){
+        UserModel userByID = getUserByID(entity.getId());
+        if(Objects.isNull(userByID)){
             entity.setId(0);
             encodeUserPassword(entity);
+        } else {
+            encodeUserPasswordIfNeeded(entity, userByID);
         }
         super.save(entity);
     }
 
+    private void encodeUserPasswordIfNeeded(UserModel entity, UserModel userByID) {
+        if(!userByID.getPassword().equals(entity.getPassword())){
+            encodeUserPassword(entity);
+        }
+    }
+
     private void encodeUserPassword(UserModel entity) {
+        if(Objects.nonNull(entity.getPassword()))
         entity.setPassword(securityHelper.encodePassword(entity.getPassword()));
     }
 
@@ -89,4 +105,48 @@ public class UserDAO extends GenericDAO<UserModel> {
         entity.setPermissions(null); // removing relationship many to many
         super.remove(entity);
     }
+
+
+    /**
+     * Example query with join and orderBy
+     */
+    public List<UserModel> getAllUserWhereRole(String roleKod){
+        QueryBuilder<UserModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
+        return qb.join(UserModel_.permissions)
+                .where(builder.equal(qb.getJoinColumn(UserModel_.permissions,RoleModel_.code),roleKod))
+                .orderBy(builder.desc(qb.getColumn(UserModel_.id)))
+                .executeWithResultList();
+    }
+
+    public List<UserModel> getAllUserWhereRole2(String roleKod){
+        TypeLessQueryBuilder qb = TypeLessQueryBuilder.createQuery(getEntityManager(),UserModel.class);
+        CriteriaBuilder builder = qb.getBuilder();
+        return qb.join("permissions")
+                .where(builder.equal(qb.getJoinColumn("permissions","code"),roleKod))
+                .orderBy(builder.desc(qb.getColumn("id")))
+                .executeWithResultList();
+    }
+
+    /**
+     * Example query with join and orderBy
+     */
+    public List<UserModel> getAllUserWhereRole3(String roleKod){
+        QueryBuilder<UserModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
+        return qb.join(UserModel_.permissions)
+                .distinct()
+                .where(builder.equal(qb.getJoinColumn(UserModel_.permissions, RoleModel_.code),roleKod))
+                .orderBy(builder.desc(qb.getColumn(UserModel_.id)))
+                .executeWithResultList();
+    }
+
+//    /**
+//     * Truncate example
+//     */
+//    public void truncate(){
+//        getEntityManager().createQuery("DELETE FROM User").executeUpdate();
+////            createQuery("DELETE FROM Country c WHERE c.population < :p");
+////            int deletedCount = query.setParameter(p, 100000).executeUpdate();
+//    }
 }

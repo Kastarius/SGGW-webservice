@@ -10,8 +10,7 @@ import pl.sggw.support.webservice.model.UserModel;
 import pl.sggw.support.webservice.populator.UserPopulator;
 import pl.sggw.support.webservice.security.AuthenticationService;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -32,16 +31,16 @@ public class UserService implements UserDetailsService {
         return userDAO.getUserByLogin(username);
     }
 
-    public UserModel loadUserByCredentials(String login, String password){
+    public UserModel getUserByCredentials(String login, String password){
         return userDAO.getUserByCredentials(login,password);
     }
 
-    public UserModel loadUserByCredentials(String userId){
+    public UserModel getUserModelById(String userId){
         return userDAO.getUserByID(Long.valueOf(userId));
     }
 
-    public User fetchUserById(String userId) throws UsernameNotFoundException {
-        return convert(userDAO.getUserByID(Long.valueOf(userId)));
+    public User getUserById(String userId) throws UsernameNotFoundException {
+        return convert(getUserModelById(userId));
     }
 
     public User saveOrUpdateUser(User user){
@@ -65,7 +64,11 @@ public class UserService implements UserDetailsService {
     }
 
     public User getCurrentUser(){
-        return convert(authenticationService.getCurrentUser());
+        return convert(getCurrentUserModel());
+    }
+
+    public UserModel getCurrentUserModel(){
+        return authenticationService.getCurrentUser();
     }
 
     private User convert(UserModel model){
@@ -73,5 +76,4 @@ public class UserService implements UserDetailsService {
         if(Objects.nonNull(model))userPopulator.populate(model,user);
         return user;
     }
-
 }

@@ -1,6 +1,7 @@
 package pl.sggw.support.webservice.dao;
 
 import org.springframework.stereotype.Repository;
+import pl.sggw.support.webservice.dao.query.QueryBuilder;
 import pl.sggw.support.webservice.model.PriorityModel;
 
 import javax.persistence.EntityManager;
@@ -34,8 +35,8 @@ public class PriorityDAO extends GenericDAO<PriorityModel> {
     }
 
     public PriorityModel getPriorityByID(long id) {
-        QueryBuilder qb = createQuery();
-        CriteriaBuilder builder = qb.getBuilder();
+        QueryBuilder<PriorityModel> qb = createQuery();
+        CriteriaBuilder builder = qb.getCriteriaBuilder();
         return qb.where(builder.equal(qb.getColumn("id"),id)).executeWithSingleResult();
     }
 
