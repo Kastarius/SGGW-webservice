@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pl.sggw.support.webservice.controller.exception.InvalidDataException;
 import pl.sggw.support.webservice.dao.exception.ConstraintViolationException;
 import pl.sggw.support.webservice.dao.exception.DatabaseOperationException;
 
@@ -38,11 +38,12 @@ public class DefaultExceptionHandler {
         return new ResponseEntity<>(String.format("Bad Request {%s} [%s]",ex.getMessage(),String.valueOf(ex.hashCode())), HttpStatus.BAD_REQUEST); //TODO parse info about violations
     }
 
-    @ExceptionHandler(InvalidDataException.class)
-    public ResponseEntity<String> handleInvalidDataException(HttpServletRequest request, InvalidDataException ex){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleInvalidDataException(HttpServletRequest request, MethodArgumentNotValidException ex){
         LOG.error("Exception Occured:: URL="+request.getRequestURL());
         LOG.error(String.valueOf(ex.hashCode()));
-        Optional<String> reduce = ex.getErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).reduce(((s, s2) -> s2 + "," + s));
+        Optional<String> reduce = ex.getBindingResult().getFieldErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).reduce(((s, s2) -> s2 + "," + s));
         LOG.error(ex.getMessage(),ex);
         return new ResponseEntity<>(String.format("Bad Request {%s} [%s]",reduce.orElse(""),String.valueOf(ex.hashCode())), HttpStatus.BAD_REQUEST);
     }

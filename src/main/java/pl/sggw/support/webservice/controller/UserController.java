@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import pl.sggw.support.webservice.controller.exception.InvalidDataException;
 import pl.sggw.support.webservice.dto.User;
 import pl.sggw.support.webservice.model.UserModel;
 import pl.sggw.support.webservice.service.UserService;
@@ -52,16 +49,13 @@ public class UserController {
     @Secured("ROLE_ADMIN")
     @RequestMapping(value = "/user", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<User> addUser(@Valid @RequestBody User user, BindingResult result) {
-        if(result.hasErrors()){
-            throw new InvalidDataException(result.getFieldErrors());
-        }
+    public ResponseEntity<User> addUser(@Valid @RequestBody User user) {
         return new ResponseEntity<>(userService.saveOrUpdateUser(user),HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @RequestMapping(value = "/user", method = RequestMethod.PUT)
-    public ResponseEntity updateUser(@RequestBody User user) {
+    public ResponseEntity updateUser(@Valid @RequestBody User user) {
         UserModel userModel = userService.getUserModelById(String.valueOf(user.getId()));
         if(Objects.isNull(userModel)) return new ResponseEntity<>(String.format("Cannot find User with id %s",String.valueOf(user.getId())),HttpStatus.BAD_REQUEST);
         userService.saveOrUpdateUser(user);
@@ -70,7 +64,7 @@ public class UserController {
 
     @RequestMapping(value = "/user/password", method = RequestMethod.PATCH)
     @ResponseBody
-    public ResponseEntity updateCurrentUserPassword(@PathVariable String userId,@RequestParam(value="password", defaultValue="") String password) {
+    public ResponseEntity updateCurrentUserPassword(@RequestParam(value="password", defaultValue="") String password) {
         if(!StringUtils.isBlank(password)){
             UserModel userModel = userService.getCurrentUserModel();
             userModel.setPassword(password);
