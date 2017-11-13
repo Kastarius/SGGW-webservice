@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.sggw.support.webservice.dao.exception.DatabaseOperationException;
 import pl.sggw.support.webservice.dao.query.QueryBuilder;
-import pl.sggw.support.webservice.dao.query.TypeLessQueryBuilder;
 import pl.sggw.support.webservice.model.*;
 import pl.sggw.support.webservice.model.RoleModel_;
 import pl.sggw.support.webservice.model.UserModel_;
@@ -13,10 +12,6 @@ import pl.sggw.support.webservice.security.SecurityHelper;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.metamodel.CollectionAttribute;
-import javax.persistence.metamodel.SetAttribute;
-import javax.persistence.metamodel.SingularAttribute;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -113,30 +108,8 @@ public class UserDAO extends GenericDAO<UserModel> {
     public List<UserModel> getAllUserWhereRole(String roleKod){
         QueryBuilder<UserModel> qb = createQuery();
         CriteriaBuilder builder = qb.getCriteriaBuilder();
-        return qb.join(UserModel_.permissions)
+        return qb.distinct().join(UserModel_.permissions)
                 .where(builder.equal(qb.getJoinColumn(UserModel_.permissions,RoleModel_.code),roleKod))
-                .orderBy(builder.desc(qb.getColumn(UserModel_.id)))
-                .executeWithResultList();
-    }
-
-    public List<UserModel> getAllUserWhereRole2(String roleKod){
-        TypeLessQueryBuilder qb = TypeLessQueryBuilder.createQuery(getEntityManager(),UserModel.class);
-        CriteriaBuilder builder = qb.getBuilder();
-        return qb.join("permissions")
-                .where(builder.equal(qb.getJoinColumn("permissions","code"),roleKod))
-                .orderBy(builder.desc(qb.getColumn("id")))
-                .executeWithResultList();
-    }
-
-    /**
-     * Example query with join and orderBy
-     */
-    public List<UserModel> getAllUserWhereRole3(String roleKod){
-        QueryBuilder<UserModel> qb = createQuery();
-        CriteriaBuilder builder = qb.getCriteriaBuilder();
-        return qb.join(UserModel_.permissions)
-                .distinct()
-                .where(builder.equal(qb.getJoinColumn(UserModel_.permissions, RoleModel_.code),roleKod))
                 .orderBy(builder.desc(qb.getColumn(UserModel_.id)))
                 .executeWithResultList();
     }
