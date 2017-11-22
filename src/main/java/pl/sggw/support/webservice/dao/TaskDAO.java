@@ -28,6 +28,9 @@ public class TaskDAO extends GenericDAO<TaskModel> {
     @Autowired
     private UserDAO userDAO;
 
+    @Autowired
+    private StatusDAO statusDAO;
+
     @Override
     protected EntityManager getEntityManager() {
         return entityManager;

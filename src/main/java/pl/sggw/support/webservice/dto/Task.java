@@ -11,6 +11,7 @@ public class Task {
     private Category category;
     private BasicUserData userData;
     private Priority priority;
+    private Status status;
 
     public long getId() {
         return id;
@@ -66,5 +67,13 @@ public class Task {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

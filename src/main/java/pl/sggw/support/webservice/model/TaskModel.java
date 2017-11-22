@@ -33,6 +33,10 @@ public class TaskModel extends ItemModel {
     @JoinColumn(name = "KategoriaId")
     private CategoryModel categoryModel;
 
+    @OneToOne
+    @JoinColumn(name = "StatusId", nullable = false)
+    private StatusModel statusModel;
+
     @Override
     public Long getId() {
         return id;
@@ -88,5 +92,13 @@ public class TaskModel extends ItemModel {
 
     public void setCategoryModel(CategoryModel categoryModel) {
         this.categoryModel = categoryModel;
+    }
+
+    public StatusModel getStatusModel() {
+        return statusModel;
+    }
+
+    public void setStatusModel(StatusModel statusModel) {
+        this.statusModel = statusModel;
     }
 }
