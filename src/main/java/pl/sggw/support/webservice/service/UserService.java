@@ -51,6 +51,15 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    public User saveOrUpdateUser(User user,boolean enableAccount){
+        UserModel userModel = new UserModel();
+        userPopulator.reversePopulate(user,userModel);
+        userModel.setEnabled(enableAccount);
+        save(userModel);
+        userPopulator.populate(userModel,user);
+        return user;
+    }
+
     public void save(UserModel userModel) {
         userDAO.save(userModel);
     }
@@ -69,6 +78,38 @@ public class UserService implements UserDetailsService {
 
     public UserModel getCurrentUserModel(){
         return authenticationService.getCurrentUser();
+    }
+
+    public void setForceLogin(UserModel userModel){
+        userModel.setForceLogin(true);
+        save(userModel);
+    }
+
+    public void setForceLoginForCurrentUser(){
+        UserModel userModel = getCurrentUserModel();
+        userModel.setForceLogin(true);
+        save(userModel);
+    }
+
+    public void removeForceLogin(UserModel userModel){
+        userModel.setForceLogin(false);
+        save(userModel);
+    }
+
+    public void disableAccount(UserModel userModel){
+        userModel.setEnabled(false);
+        save(userModel);
+    }
+
+    public void enableAccount(UserModel userModel){
+        userModel.setEnabled(true);
+        save(userModel);
+    }
+
+    public void updateLastLogin(UserModel userModel){
+        userModel.setLastLogin(new Date());
+        userModel.setForceLogin(false);
+        save(userModel);
     }
 
     private User convert(UserModel model){

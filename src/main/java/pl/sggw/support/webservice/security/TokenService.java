@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import pl.sggw.support.webservice.model.UserModel;
 import pl.sggw.support.webservice.security.exception.TokenValidationFailureException;
+import pl.sggw.support.webservice.security.util.TokenValidationResult;
 import pl.sggw.support.webservice.service.UserService;
 
 import java.util.Calendar;
@@ -41,7 +42,7 @@ public class TokenService {
             return userService.loadUserByUsername(username);
         } catch(ExpiredJwtException | MalformedJwtException | SignatureException e){
             LOG.error(e.getMessage());
-            throw new TokenValidationFailureException(e);
+            throw new TokenValidationFailureException(e,validate(token));
         }
     }
 
@@ -57,5 +58,22 @@ public class TokenService {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.SECOND, Integer.valueOf(tokenExpirationTime));
         return calendar.getTime();
+    }
+
+    public Date getExpirationDate(String token){
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getExpiration();
+    }
+
+    public TokenValidationResult validate(String token){
+        try{
+            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+        } catch (SignatureException e){
+            return TokenValidationResult.INCORRECT;
+        } catch (ExpiredJwtException e){
+            return TokenValidationResult.EXPIRED;
+        } catch (MalformedJwtException e){
+            return TokenValidationResult.MALFORMED;
+        }
+        return TokenValidationResult.VALID;
     }
 }

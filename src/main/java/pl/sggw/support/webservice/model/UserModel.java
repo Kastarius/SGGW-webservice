@@ -1,10 +1,9 @@
 package pl.sggw.support.webservice.model;
 
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,6 +33,12 @@ public class UserModel extends ItemModel implements UserDetails {
     @ManyToMany(cascade=CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinTable(name="RolaUzytkownika", joinColumns=@JoinColumn(name="UzytkownikID"), inverseJoinColumns=@JoinColumn(name="RolaID"))
     private Set<RoleModel> permissions;
+    @Column(name = "OstatnieLogowanie")
+    private Date lastLogin;
+    @Column(name = "WymuśLogowanie")
+    private boolean forceLogin;
+    @Column(name = "AktywneKonto")
+    private boolean enabled;
 
     public UserModel() {
     }
@@ -86,7 +91,7 @@ public class UserModel extends ItemModel implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return Boolean.TRUE.equals(enabled);
     }
 
     public void setPassword(String password) {
@@ -134,5 +139,25 @@ public class UserModel extends ItemModel implements UserDetails {
 
     public void setPermissions(Set<RoleModel> permissions) {
         this.permissions = permissions;
+    }
+
+    public Date getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(Date lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public boolean isForceLogin() {
+        return forceLogin;
+    }
+
+    public void setForceLogin(boolean forceLogin) {
+        this.forceLogin = forceLogin;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
