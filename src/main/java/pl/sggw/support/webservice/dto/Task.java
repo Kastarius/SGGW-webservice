@@ -1,6 +1,8 @@
 package pl.sggw.support.webservice.dto;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Task {
 
@@ -11,6 +13,7 @@ public class Task {
     private Category category;
     private BasicUserData userData;
     private Priority priority;
+    private List<Comment> comments;
 
     public long getId() {
         return id;
@@ -66,5 +69,16 @@ public class Task {
 
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    public List<Comment> getComments() {
+        if (this.comments == null) {
+            this.comments = new ArrayList<>();
+        }
+        return this.comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }

@@ -5,11 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
+import pl.sggw.support.webservice.dto.Comment;
 import pl.sggw.support.webservice.dto.Task;
-import pl.sggw.support.webservice.model.TaskModel;
 import pl.sggw.support.webservice.service.TaskService;
 
-import javax.ws.rs.DELETE;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +27,7 @@ public class TaskController {
 
     @ResponseBody
     @PostMapping
-    public ResponseEntity<Task> add(@RequestBody Task task) {
+    public ResponseEntity<Task> addComment(@RequestBody Task task) {
         return new ResponseEntity<>(taskService.save(task), HttpStatus.CREATED);
     }
 
@@ -57,4 +56,17 @@ public class TaskController {
         return new ResponseEntity<>(task1, HttpStatus.CREATED);
     }
 
+    @Secured("ROLE_USER")
+    @RequestMapping(method = RequestMethod.GET, path = "{id}/comment")
+    @ResponseBody
+    public List<Comment> getAllComments(@PathVariable String id) {
+        return taskService.getTaskComments(id);
+    }
+
+    @Secured("ROLE_USER")
+    @RequestMapping(method = RequestMethod.POST, path = "{id}/comment")
+    @ResponseBody
+    public Comment addComment(@PathVariable(name = "id") String taskId, @RequestBody Comment comment) {
+        return taskService.addComment(comment, taskId);
+    }
 }

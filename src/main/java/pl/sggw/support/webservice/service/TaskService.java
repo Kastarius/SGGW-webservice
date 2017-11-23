@@ -4,6 +4,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.sggw.support.webservice.dao.TaskDAO;
+import pl.sggw.support.webservice.dto.Comment;
 import pl.sggw.support.webservice.dto.Task;
 import pl.sggw.support.webservice.model.TaskModel;
 import pl.sggw.support.webservice.populator.TaskPopulator;
@@ -18,6 +19,9 @@ public class TaskService {
 
     @Autowired
     TaskPopulator taskPopulator;
+
+    @Autowired
+    UserService userService;
 
     @Autowired
     TaskDAO taskDAO;
@@ -53,5 +57,17 @@ public class TaskService {
 
     public void remove(long id) {
         taskDAO.remove(taskDAO.getTaskById(id));
+    }
+
+    public Comment addComment(Comment comment, String taskId) {
+        Task taskById = getTaskById(taskId);
+        List<Comment> comments = taskById.getComments();
+        comments.add(comment);
+        save(taskById);
+        return comment;
+    }
+
+    public List<Comment> getTaskComments(String taskId) {
+        return getTaskById(taskId).getComments();
     }
 }

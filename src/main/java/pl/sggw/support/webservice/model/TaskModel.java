@@ -1,14 +1,16 @@
 package pl.sggw.support.webservice.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Zgloszenie")
 public class TaskModel extends ItemModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "TASK_SEQ")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ZgloszenieId")
     private long id;
 
@@ -32,6 +34,9 @@ public class TaskModel extends ItemModel {
     @OneToOne
     @JoinColumn(name = "KategoriaId")
     private CategoryModel categoryModel;
+
+    @OneToMany(targetEntity = CommentModel.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentModel> comments;
 
     @Override
     public Long getId() {
@@ -88,5 +93,23 @@ public class TaskModel extends ItemModel {
 
     public void setCategoryModel(CategoryModel categoryModel) {
         this.categoryModel = categoryModel;
+    }
+
+    public List<CommentModel> getComments() {
+        if (this.comments == null) {
+            this.comments =  new ArrayList<>();
+        }
+        return comments;
+    }
+
+    public void setComments(List<CommentModel> comments) {
+        this.comments = comments;
+    }
+
+    public void removeComment(CommentModel model) {
+        comments.remove(model);
+        if (model != null) {
+            model.setTask(null);
+        }
     }
 }

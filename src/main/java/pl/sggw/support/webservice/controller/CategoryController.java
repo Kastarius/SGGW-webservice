@@ -17,7 +17,6 @@ public class CategoryController {
     @Autowired
     private CategoryService service;
 
-    @Secured("ROLE_ADMIN")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public List<Category> getAll() {
@@ -40,10 +39,10 @@ public class CategoryController {
     }
 
     @Secured("ROLE_ADMIN")
-    @RequestMapping(value = "/{priorityId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{categoryId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public ResponseEntity delete(@PathVariable String category) {
-        service.remove(Long.valueOf(category));
+    public ResponseEntity delete(@PathVariable String id) {
+        service.remove(Long.valueOf(id));
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
 }
