@@ -8,7 +8,7 @@ import java.util.Date;
 public class TaskModel extends ItemModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "TASK_SEQ")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ZgloszenieId")
     private long id;
 
