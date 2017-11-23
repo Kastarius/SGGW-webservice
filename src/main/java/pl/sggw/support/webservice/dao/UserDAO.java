@@ -7,7 +7,7 @@ import pl.sggw.support.webservice.dao.query.QueryBuilder;
 import pl.sggw.support.webservice.model.*;
 import pl.sggw.support.webservice.model.RoleModel_;
 import pl.sggw.support.webservice.model.UserModel_;
-import pl.sggw.support.webservice.security.SecurityHelper;
+import pl.sggw.support.webservice.security.util.SecurityHelper;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import pl.sggw.support.webservice.security.util.AnonymousUserHandler;
 import pl.sggw.support.webservice.security.TokenAuthenticationFilter;
 import pl.sggw.support.webservice.security.TokenAuthenticationService;
 
@@ -44,7 +45,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/**","/swagger-ui.html","/swagger-ui/**","/webjars/**","/swagger-resources/**","/v2/**").permitAll()
                 .anyRequest().authenticated().and()
                 .addFilterBefore(new TokenAuthenticationFilter(tokenAuthenticationService),
-                        UsernamePasswordAuthenticationFilter.class);
+                        UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                .authenticationEntryPoint(new AnonymousUserHandler());
     }
 
     @Bean

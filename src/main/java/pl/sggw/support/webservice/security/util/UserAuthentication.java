@@ -1,4 +1,4 @@
-package pl.sggw.support.webservice.security;
+package pl.sggw.support.webservice.security.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,6 +18,11 @@ public class UserAuthentication implements Authentication {
 
     public UserAuthentication(UserModel user) {
         this.user = user;
+    }
+
+    public UserAuthentication(UserModel user, boolean authenticated) {
+        this.user = user;
+        this.authenticated = authenticated;
     }
 
     @Override
@@ -47,7 +52,7 @@ public class UserAuthentication implements Authentication {
 
     @Override
     public void setAuthenticated(boolean b) throws IllegalArgumentException {
-        this.authenticated = authenticated;
+        this.authenticated = b;
     }
 
     @Override
