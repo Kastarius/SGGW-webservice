@@ -18,6 +18,9 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
 
     @Autowired
     CommentPopulator commentPopulator;
+  
+    @Autowired
+    StatusPopulator statusPopulator;
 
     @Override
     public void populate(TaskModel source, Task target) {
@@ -53,6 +56,12 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
             comments.add(c);
         });
         target.setComments(comments);
+      
+        Status status = new Status();
+        StatusModel statusModel = source.getStatusModel();
+        status.setId(statusModel.getId());
+        status.setName(statusModel.getName());
+        target.setStatus(status);
     }
 
     @Override
@@ -63,6 +72,7 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
         target.setDescription(source.getDescription());
         target.setPriorityModel(convertToPriorityModel(source.getPriority()));
         target.setCategoryModel(convertToCategoryModel(source.getCategory()));
+        target.setStatusModel(convertToStatusModel(source.getStatus()));
 
         BasicUserData userData = source.getUserData();
         UserModel userModel = new UserModel();
@@ -94,5 +104,11 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
         CategoryModel categoryModel = new CategoryModel();
         categoryPopulator.reversePopulate(category, categoryModel);
         return categoryModel;
+    }
+
+    private StatusModel convertToStatusModel(Status status) {
+        StatusModel statusModel = new StatusModel();
+        statusPopulator.reversePopulate(status, statusModel);
+        return statusModel;
     }
 }

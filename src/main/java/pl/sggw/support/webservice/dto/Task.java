@@ -14,6 +14,7 @@ public class Task {
     private BasicUserData userData;
     private Priority priority;
     private List<Comment> comments;
+    private Status status;
 
     public long getId() {
         return id;
@@ -80,5 +81,11 @@ public class Task {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

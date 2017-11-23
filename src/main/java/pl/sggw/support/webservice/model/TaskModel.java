@@ -37,6 +37,10 @@ public class TaskModel extends ItemModel {
 
     @OneToMany(targetEntity = CommentModel.class, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentModel> comments;
+  
+    @OneToOne
+    @JoinColumn(name = "StatusId", nullable = false)
+    private StatusModel statusModel;
 
     @Override
     public Long getId() {
@@ -111,5 +115,12 @@ public class TaskModel extends ItemModel {
         if (model != null) {
             model.setTask(null);
         }
+      
+    public StatusModel getStatusModel() {
+        return statusModel;
+    }
+
+    public void setStatusModel(StatusModel statusModel) {
+        this.statusModel = statusModel;
     }
 }

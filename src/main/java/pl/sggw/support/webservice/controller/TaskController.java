@@ -9,6 +9,15 @@ import pl.sggw.support.webservice.dto.Comment;
 import pl.sggw.support.webservice.dto.Task;
 import pl.sggw.support.webservice.service.TaskService;
 
+import pl.sggw.support.webservice.dto.Status;
+import pl.sggw.support.webservice.dto.Task;
+import pl.sggw.support.webservice.model.TaskModel;
+import pl.sggw.support.webservice.service.StatusService;
+import pl.sggw.support.webservice.service.TaskService;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.PUT;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +27,9 @@ public class TaskController {
 
     @Autowired
     TaskService taskService;
+
+    @Autowired
+    StatusService statusService;
 
     @ResponseBody
     @GetMapping
@@ -49,12 +61,13 @@ public class TaskController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
+    @PutMapping
     @ResponseBody
     public ResponseEntity<Task> updateTask(@RequestBody Task task) {
         Task task1 = taskService.saveOrUpdate(task);
         return new ResponseEntity<>(task1, HttpStatus.CREATED);
     }
+
 
     @Secured("ROLE_USER")
     @RequestMapping(method = RequestMethod.GET, path = "{id}/comment")
@@ -68,5 +81,16 @@ public class TaskController {
     @ResponseBody
     public Comment addComment(@PathVariable(name = "id") String taskId, @RequestBody Comment comment) {
         return taskService.addComment(comment, taskId);
+    }
+
+    @PutMapping("/{id}/status")
+    @ResponseBody
+    public ResponseEntity changeStatus(@PathVariable String id, @RequestBody String statusId) {
+        Task task = taskService.getTaskById(id);
+        Status status = statusService.getStatus(statusId);
+        if (Objects.isNull(status)) return new ResponseEntity<>(String.format("Cannot find status with id %s", id), HttpStatus.NOT_FOUND);
+        task.setStatus(status);
+        taskService.saveOrUpdate(task);
+        return new ResponseEntity<>(task, HttpStatus.OK);
     }
 }
