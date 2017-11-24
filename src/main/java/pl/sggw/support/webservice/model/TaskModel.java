@@ -1,7 +1,9 @@
 package pl.sggw.support.webservice.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Zgloszenie")
@@ -33,6 +35,9 @@ public class TaskModel extends ItemModel {
     @JoinColumn(name = "KategoriaId")
     private CategoryModel categoryModel;
 
+    @OneToMany(targetEntity = CommentModel.class, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentModel> comments;
+  
     @OneToOne
     @JoinColumn(name = "StatusId", nullable = false)
     private StatusModel statusModel;
@@ -94,6 +99,23 @@ public class TaskModel extends ItemModel {
         this.categoryModel = categoryModel;
     }
 
+    public List<CommentModel> getComments() {
+        if (this.comments == null) {
+            this.comments =  new ArrayList<>();
+        }
+        return comments;
+    }
+
+    public void setComments(List<CommentModel> comments) {
+        this.comments = comments;
+    }
+
+    public void removeComment(CommentModel model) {
+        comments.remove(model);
+        if (model != null) {
+            model.setTask(null);
+        }
+      
     public StatusModel getStatusModel() {
         return statusModel;
     }

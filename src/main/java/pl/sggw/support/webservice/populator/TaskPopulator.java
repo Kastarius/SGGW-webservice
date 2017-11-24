@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import pl.sggw.support.webservice.dto.*;
 import pl.sggw.support.webservice.model.*;
 
+import java.util.List;
+
 @Component
 public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
 
@@ -14,6 +16,9 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
     @Autowired
     CategoryPopulator categoryPopulator;
 
+    @Autowired
+    CommentPopulator commentPopulator;
+  
     @Autowired
     StatusPopulator statusPopulator;
 
@@ -43,6 +48,15 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
         userData.setLastName(userModel.getLastName());
         target.setUserData(userData);
 
+        List<CommentModel> commentModels = source.getComments();
+        List<Comment> comments = target.getComments();
+        commentModels.stream().forEach(commentModel -> {
+            Comment c = new Comment();
+            commentPopulator.populate(commentModel, c);
+            comments.add(c);
+        });
+        target.setComments(comments);
+      
         Status status = new Status();
         StatusModel statusModel = source.getStatusModel();
         status.setId(statusModel.getId());
@@ -66,6 +80,18 @@ public class TaskPopulator extends AbstractPopulator<TaskModel, Task> {
         userModel.setFirstName(userData.getFirstName());
         userModel.setLastName(userData.getLastName());
         target.setUserModel(userModel);
+
+        List<Comment> comments = source.getComments();
+        List<CommentModel> commentModels = target.getComments();
+        comments.stream().forEach(comment -> {
+            CommentModel cm = new CommentModel();
+            BasicUserData userData1 = comment.getUserData();
+            UserModel userModel1 = new UserModel();
+            userModel1.setId(userData1.getId());
+            commentPopulator.reversePopulate(comment, cm, userModel, target);
+            commentModels.add(cm);
+        });
+        target.setComments(commentModels);
     }
 
     private PriorityModel convertToPriorityModel(Priority priority) {
