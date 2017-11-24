@@ -10,13 +10,8 @@ import pl.sggw.support.webservice.dto.Task;
 import pl.sggw.support.webservice.service.TaskService;
 
 import pl.sggw.support.webservice.dto.Status;
-import pl.sggw.support.webservice.dto.Task;
-import pl.sggw.support.webservice.model.TaskModel;
 import pl.sggw.support.webservice.service.StatusService;
-import pl.sggw.support.webservice.service.TaskService;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
 
 import java.util.List;
 import java.util.Objects;

@@ -115,6 +115,7 @@ public class TaskModel extends ItemModel {
         if (model != null) {
             model.setTask(null);
         }
+    }
       
     public StatusModel getStatusModel() {
         return statusModel;

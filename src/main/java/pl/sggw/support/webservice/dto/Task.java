@@ -81,6 +81,8 @@ public class Task {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
     public Status getStatus() {
         return status;
     }
