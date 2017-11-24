@@ -17,7 +17,6 @@ public class PriorityController {
     @Autowired
     private PriorityService service;
 
-    @Secured("ROLE_ADMIN")
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public List<Priority> getAll() {
