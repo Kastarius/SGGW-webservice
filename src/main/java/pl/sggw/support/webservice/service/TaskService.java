@@ -4,8 +4,10 @@ import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.sggw.support.webservice.dao.TaskDAO;
+import pl.sggw.support.webservice.dto.BasicUserData;
 import pl.sggw.support.webservice.dto.Comment;
 import pl.sggw.support.webservice.dto.Task;
+import pl.sggw.support.webservice.dto.User;
 import pl.sggw.support.webservice.model.TaskModel;
 import pl.sggw.support.webservice.populator.TaskPopulator;
 
@@ -65,6 +67,18 @@ public class TaskService {
         comments.add(comment);
         save(taskById);
         return comment;
+    }
+
+    public Task assignUser(String taskId, String userId) {
+        Task task = getTaskById(taskId);
+        User user = userService.getUserById(userId);
+        BasicUserData basicUserData = new BasicUserData();
+        basicUserData.setFirstName(user.getFirstName());
+        basicUserData.setLastName(user.getLastName());
+        basicUserData.setId(user.getId());
+        task.setUserData(basicUserData);
+        saveOrUpdate(task);
+        return task;
     }
 
     public List<Comment> getTaskComments(String taskId) {

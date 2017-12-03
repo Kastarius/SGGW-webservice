@@ -5,12 +5,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
-import pl.sggw.support.webservice.dto.Comment;
-import pl.sggw.support.webservice.dto.Task;
+import pl.sggw.support.webservice.dto.*;
 import pl.sggw.support.webservice.service.TaskService;
 
-import pl.sggw.support.webservice.dto.Status;
 import pl.sggw.support.webservice.service.StatusService;
+import pl.sggw.support.webservice.service.UserService;
 
 
 import java.util.List;
@@ -25,6 +24,9 @@ public class TaskController {
 
     @Autowired
     StatusService statusService;
+
+    @Autowired
+    UserService userService;
 
     @ResponseBody
     @GetMapping
@@ -42,7 +44,7 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<Task> get(@PathVariable String id) {
         Task task = taskService.getTaskById(id);
-        if (Objects.isNull(task)) return new ResponseEntity<Task>(HttpStatus.NOT_FOUND);
+        if (Objects.isNull(task)) return new ResponseEntity<Task>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(taskService.getTaskById(id), HttpStatus.OK);
     }
 
@@ -51,7 +53,7 @@ public class TaskController {
     @ResponseBody
     public ResponseEntity delete(@PathVariable String id) {
         Task task = taskService.getTaskById(id);
-        if (Objects.isNull(task)) return new ResponseEntity<Task>(HttpStatus.NOT_FOUND);
+        if (Objects.isNull(task)) return new ResponseEntity<Task>(HttpStatus.BAD_REQUEST);
         taskService.remove(Long.valueOf(id));
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -83,9 +85,19 @@ public class TaskController {
     public ResponseEntity changeStatus(@PathVariable String id, @RequestBody String statusId) {
         Task task = taskService.getTaskById(id);
         Status status = statusService.getStatus(statusId);
-        if (Objects.isNull(status)) return new ResponseEntity<>(String.format("Cannot find status with id %s", id), HttpStatus.NOT_FOUND);
+        if (Objects.isNull(status)) return new ResponseEntity<>(String.format("Cannot find status with id %s", id), HttpStatus.BAD_REQUEST);
         task.setStatus(status);
         taskService.saveOrUpdate(task);
+        return new ResponseEntity<>(task, HttpStatus.OK);
+    }
+
+    @Secured("ROLE_USER")
+    @PutMapping("/{id}/user")
+    @ResponseBody
+    public ResponseEntity assignUser(@PathVariable String taskId, @RequestBody String userId) {
+        User user = userService.getUserById(userId);
+        if (Objects.isNull(user)) return new ResponseEntity<>(String.format("Cannot find user with id %s", userId), HttpStatus.BAD_REQUEST);
+        Task task = taskService.assignUser(taskId, userId);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 }
